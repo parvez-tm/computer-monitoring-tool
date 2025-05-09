@@ -4,8 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const si = require('systeminformation');
 
-let location = __dirname + '/index.html'
-
 let server = http.createServer(async (req,res)=>{
     // res.writeHead(200, { 'Content-Type': 'text/plain' });
     
@@ -27,19 +25,19 @@ let server = http.createServer(async (req,res)=>{
           res.end(JSON.stringify(stats));
     }else{
       // My research on google 
-        // fs.readFile(location, (err, data) => {
-        //     if (err) {
-        //       res.writeHead(404, { 'Content-Type': 'text/html' });
-        //       res.end('404: File not found');
-        //     } else {
-        //       res.writeHead(200, { 'Content-Type': 'text/html' });
-        //       res.end(data);
-        //     }
-        //   });
+        fs.readFile('index.html', (err, data) => {
+            if (err) {
+              res.writeHead(404, { 'Content-Type': 'text/html' });
+              res.end('404: File not found');
+            } else {
+              res.writeHead(200, { 'Content-Type': 'text/html' });
+              res.end(data);
+            }
+          });
 
         // GTP Way 
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(require('fs').readFileSync('index.html'));
+        // res.writeHead(200, { 'Content-Type': 'text/html' });
+        // res.end(require('fs').readFileSync('index.html'));
     }
 })
 
