@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Stats Dashboard</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #1e40af;
+      --accent: #3b82f6;
+      --background: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-secondary: #94a3b8;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard {
+      max-width: 900px;
+      width: 90%;
+      margin: 2rem auto;
+    }
+
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pulse {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #10b981;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .last-updated {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .stat-title {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      margin: 0;
+    }
+
+    .stat-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--accent);
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0;
+      display: flex;
+      align-items: baseline;
+    }
+
+    .stat-unit {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-left: 0.5rem;
+    }
+
+    .progress-bar {
+      height: 8px;
+      width: 100%;
+      background-color: rgba(59, 130, 246, 0.2);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .progress-value {
+      height: 100%;
+      border-radius: 9999px;
+      background-color: var(--accent);
+      transition: width 0.5s ease;
+    }
+
+    .cpu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .cpu-core {
+      text-align: center;
+      background-color: rgba(59, 130, 246, 0.1);
+      border-radius: 0.5rem;
+      padding: 0.75rem 0.5rem;
+    }
+
+    .cpu-core-number {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .cpu-core-usage {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .temperature-gauge {
+      position: relative;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(to right, #3b82f6, #10b981, #f59e0b, #ef4444);
+      border-radius: 9999px;
+      margin-top: 1rem;
+    }
+
+    .temperature-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 12px;
+      height: 12px;
+      background-color: white;
+      border-radius: 50%;
+      border: 2px solid var(--card-bg);
+      transition: left 0.5s ease;
+    }
+
+    .load-avg-bars {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      align-items: flex-end;
+      height: 50px;
+    }
+
+    .load-avg-bar {
+      flex: 1;
+      background-color: var(--accent);
+      border-radius: 0.25rem 0.25rem 0 0;
+      transition: height 0.5s ease;
+    }
+
+    .load-avg-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 0.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .system-info {
+      margin-top: 2rem;
+      background-color: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+    }
+
+    .system-info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .system-info-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .system-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .system-info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .system-info-label {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .system-info-value {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1>
+        <span class="pulse"></span>
+        System Stats Dashboard
+      </h1>
+      <div class="last-updated" id="last-updated">
+        Last updated: Just now
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">
+          <h2 class="stat-title">Uptime</h2>
+          <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div id="uptime-value" class="stat-value">
+          0<span class="stat-unit">sec</span>
+        </div>
+        <div id="uptime-formatted"></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <h2 class="stat-title">Memory Usage</h2>
+          <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div id="memory-value" class="stat-value">
+          0<span class="stat-unit">MB</span>
+        </div>
+        <div class="progress-bar">
+          <div id="memory-bar" class="progress-value" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <h2 class="stat-title">CPU Cores</h2>
+          <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+          </svg>
+        </div>
+        <div id="cpu-value" class="stat-value">
+          0<span class="stat-unit">cores</span>
+        </div>
+        <div id="cpu-grid" class="cpu-grid">
+          <!-- CPU cores will be populated dynamically -->
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <h2 class="stat-title">Temperature</h2>
+          <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div id="temp-value" class="stat-value">
+          0°C<span class="stat-unit">/ 0°F</span>
+        </div>
+        <div class="temperature-gauge">
+          <div id="temp-marker" class="temperature-marker" style="left: 0%"></div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">
+          <h2 class="stat-title">Load Average</h2>
+          <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <div id="load-value" class="stat-value">
+          0, 0, 0
+        </div>
+        <div class="load-avg-bars">
+          <div class="load-avg-column">
+            <div id="load-bar-1" class="load-avg-bar" style="height: 0%"></div>
+            <div class="load-avg-label">1 min</div>
+          </div>
+          <div class="load-avg-column">
+            <div id="load-bar-5" class="load-avg-bar" style="height: 0%"></div>
+            <div class="load-avg-label">5 min</div>
+          </div>
+          <div class="load-avg-column">
+            <div id="load-bar-15" class="load-avg-bar" style="height: 0%"></div>
+            <div class="load-avg-label">15 min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="system-info">
+      <div class="system-info-header">
+        <h3 class="system-info-title">System Information</h3>
+      </div>
+      <div class="system-info-grid">
+        <div class="system-info-item">
+          <div class="system-info-label">Total Memory</div>
+          <div id="total-memory" class="system-info-value">0 MB</div>
+        </div>
+        <div class="system-info-item">
+          <div class="system-info-label">Free Memory</div>
+          <div id="free-memory" class="system-info-value">0 MB</div>
+        </div>
+        <div class="system-info-item">
+          <div class="system-info-label">Memory Usage</div>
+          <div id="memory-usage" class="system-info-value">0%</div>
+        </div>
+        <div class="system-info-item">
+          <div class="system-info-label">Uptime</div>
+          <div id="detailed-uptime" class="system-info-value">0 sec</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mock data for development purposes
+    let mockData = {
+      uptime: 3600,
+      freemem: 4 * 1024 * 1024 * 1024, // 4 GB
+      totalmem: 16 * 1024 * 1024 * 1024, // 16 GB
+      loadavg: [1.5, 1.2, 0.8],
+      cpus: Array(8).fill().map((_, i) => ({
+        model: `Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz`,
+        speed: 3800,
+        times: {
+          user: Math.random() * 100000,
+          nice: Math.random() * 1000,
+          sys: Math.random() * 50000,
+          idle: Math.random() * 500000,
+          irq: Math.random() * 1000
+        }
+      })),
+      temp: `45.75 °C / 114.35 °F`
+    };
+
+    // Function to format uptime
+    function formatUptime(seconds) {
+      const days = Math.floor(seconds / (3600 * 24));
+      const hours = Math.floor((seconds % (3600 * 24)) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      
+      let formatted = '';
+      if (days > 0) formatted += `${days}d `;
+      if (hours > 0 || days > 0) formatted += `${hours}h `;
+      if (minutes > 0 || hours > 0 || days > 0) formatted += `${minutes}m `;
+      formatted += `${remainingSeconds}s`;
+      
+      return formatted;
+    }
+
+    // Function to calculate CPU usage percentage
+    function calculateCpuUsage(cpu) {
+      const total = Object.values(cpu.times).reduce((acc, time) => acc + time, 0);
+      const idle = cpu.times.idle;
+      return Math.round(100 - (idle / total * 100));
+    }
+
+    // Function to update the UI with new stats
+    function updateStats(data) {
+      // Update uptime
+      document.getElementById('uptime-value').innerHTML = `${Math.floor(data.uptime)}<span class="stat-unit">sec</span>`;
+      document.getElementById('uptime-formatted').textContent = formatUptime(data.uptime);
+      document.getElementById('detailed-uptime').textContent = formatUptime(data.uptime);
+      
+      // Update memory
+      const usedMem = data.totalmem - data.freemem;
+      const memPercentage = (usedMem / data.totalmem * 100).toFixed(1);
+      document.getElementById('memory-value').innerHTML = `${Math.round(usedMem / 1024 / 1024)}<span class="stat-unit">MB</span>`;
+      document.getElementById('memory-bar').style.width = `${memPercentage}%`;
+      document.getElementById('total-memory').textContent = `${Math.round(data.totalmem / 1024 / 1024)} MB`;
+      document.getElementById('free-memory').textContent = `${Math.round(data.freemem / 1024 / 1024)} MB`;
+      document.getElementById('memory-usage').textContent = `${memPercentage}%`;
+      
+      // Update CPU cores
+      document.getElementById('cpu-value').innerHTML = `${data.cpus.length}<span class="stat-unit">cores</span>`;
+      
+      const cpuGrid = document.getElementById('cpu-grid');
+      cpuGrid.innerHTML = '';
+      
+      data.cpus.forEach((cpu, index) => {
+        const usage = calculateCpuUsage(cpu);
+        const coreElement = document.createElement('div');
+        coreElement.className = 'cpu-core';
+        coreElement.innerHTML = `
+          <div class="cpu-core-number">Core ${index + 1}</div>
+          <div class="cpu-core-usage">${usage}%</div>
+        `;
+        cpuGrid.appendChild(coreElement);
+      });
+      
+      // Update temperature
+      const tempMatch = data.temp.match(/(\d+\.?\d*) °C/);
+      const tempC = tempMatch ? parseFloat(tempMatch[1]) : 0;
+      const tempPercentage = Math.min(Math.max((tempC - 20) / 80 * 100, 0), 100);
+      document.getElementById('temp-value').innerHTML = `${data.temp.split(' / ')[0]}<span class="stat-unit">/ ${data.temp.split(' / ')[1]}</span>`;
+      document.getElementById('temp-marker').style.left = `${tempPercentage}%`;
+      
+      // Update load average
+      document.getElementById('load-value').textContent = data.loadavg.map(n => n.toFixed(2)).join(', ');
+      
+      // Calculate appropriate scale for load bars
+      const maxLoad = Math.max(...data.loadavg, 1) * 1.2;
+      
+      document.getElementById('load-bar-1').style.height = `${Math.min(data.loadavg[0] / maxLoad * 100, 100)}%`;
+      document.getElementById('load-bar-5').style.height = `${Math.min(data.loadavg[1] / maxLoad * 100, 100)}%`;
+      document.getElementById('load-bar-15').style.height = `${Math.min(data.loadavg[2] / maxLoad * 100, 100)}%`;
+      
+      // Update last updated time
+      const now = new Date();
+      document.getElementById('last-updated').textContent = `Last updated: ${now.toLocaleTimeString()}`;
+    }
+
+    // Initialize the dashboard with mock data
+    updateStats(mockData);
+
+    // In a real environment, this would be replaced with your actual fetchStats function
+    function fetchStats() {
+      // For demonstration purposes, we'll use the mock data and slightly modify it
+      mockData.uptime += 1;
+      mockData.freemem = Math.max(mockData.freemem - Math.random() * 100000000, 1024 * 1024 * 1024);
+      mockData.loadavg = [
+        Math.max(Math.min(mockData.loadavg[0] + (Math.random() - 0.5) * 0.2, 5), 0.1),
+        Math.max(Math.min(mockData.loadavg[1] + (Math.random() - 0.5) * 0.1, 4), 0.1),
+        Math.max(Math.min(mockData.loadavg[2] + (Math.random() - 0.5) * 0.05, 3), 0.1)
+      ];
+      
+      // Simulate fluctuating temperature
+      const tempC = parseFloat(mockData.temp.match(/(\d+\.?\d*) °C/)[1]);
+      const newTempC = Math.max(Math.min(tempC + (Math.random() - 0.5), 90), 30);
+      const newTempF = (newTempC * 9/5) + 32;
+      mockData.temp = `${newTempC.toFixed(2)} °C / ${newTempF.toFixed(2)} °F`;
+      
+      // Update CPU usage
+      mockData.cpus = mockData.cpus.map(cpu => {
+        const newCpu = {...cpu};
+        newCpu.times = {...cpu.times};
+        
+        // Adjust times
+        newCpu.times.user += Math.random() * 5000;
+        newCpu.times.nice += Math.random() * 100;
+        newCpu.times.sys += Math.random() * 2500;
+        newCpu.times.idle += Math.random() * 7500;
+        newCpu.times.irq += Math.random() * 100;
+        
+        return newCpu;
+      });
+      
+      updateStats(mockData);
+    }
+
+    // In your actual implementation:
+    // Replace the above fetchStats function with your actual implementation
+    // that fetches data from your backend and updates the dashboard
+    
+    // Set up the interval to fetch stats every second
+    setInterval(fetchStats, 1000);
+  </script>
+</body>
+</html>

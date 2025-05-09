@@ -9,7 +9,7 @@
   </style>
 </head>
 <body>
-  <h1>Raspberry Pi 5 Stats</h1>
+  <h1>Parvez's Raspberry Pi 5 Stats</h1>
   <div id="stats"></div>
 
   <script>
@@ -23,6 +23,7 @@
         <div class="stat"><strong>Total Memory:</strong> ${Math.round(data.totalmem / 1024 / 1024)} MB</div>
         <div class="stat"><strong>Load Avg:</strong> ${data.loadavg.map(n => n.toFixed(2)).join(', ')}</div>
         <div class="stat"><strong>CPU Cores:</strong> ${data.cpus.length}</div>
+        <div class="stat"><strong>Temperature:</strong> ${data.temp}</div>
       `;
     }
 
