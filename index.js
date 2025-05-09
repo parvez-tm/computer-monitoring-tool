@@ -36,7 +36,7 @@ let server = http.createServer(async (req, res) => {
 
   } else {
     // My research on google 
-    fs.readFile('index.html', (err, data) => {
+    fs.readFile('dashboard.html', (err, data) => {
       if (err) {
         res.writeHead(404, { 'Content-Type': 'text/html' });
         res.end('404: File not found');

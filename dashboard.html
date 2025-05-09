@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Stats Dashboard</title>
+  <title>Parvez's Raspberry Pi 5 Stats</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -275,7 +275,7 @@
     <div class="dashboard-header">
       <h1>
         <span class="pulse"></span>
-        System Stats Dashboard
+        Parvez's Raspberry Pi 5 Stats
       </h1>
       <div class="last-updated" id="last-updated">
         Last updated: Just now
@@ -400,7 +400,7 @@
       freemem: 4 * 1024 * 1024 * 1024, // 4 GB
       totalmem: 16 * 1024 * 1024 * 1024, // 16 GB
       loadavg: [1.5, 1.2, 0.8],
-      cpus: Array(8).fill().map((_, i) => ({
+      cpus: Array(4).fill().map((_, i) => ({
         model: `Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz`,
         speed: 3800,
         times: {
@@ -493,41 +493,43 @@
     }
 
     // Initialize the dashboard with mock data
-    updateStats(mockData);
+    // updateStats(mockData);
 
     // In a real environment, this would be replaced with your actual fetchStats function
-    function fetchStats() {
+    async function fetchStats() {
       // For demonstration purposes, we'll use the mock data and slightly modify it
-      mockData.uptime += 1;
-      mockData.freemem = Math.max(mockData.freemem - Math.random() * 100000000, 1024 * 1024 * 1024);
-      mockData.loadavg = [
-        Math.max(Math.min(mockData.loadavg[0] + (Math.random() - 0.5) * 0.2, 5), 0.1),
-        Math.max(Math.min(mockData.loadavg[1] + (Math.random() - 0.5) * 0.1, 4), 0.1),
-        Math.max(Math.min(mockData.loadavg[2] + (Math.random() - 0.5) * 0.05, 3), 0.1)
-      ];
+    //   mockData.uptime += 1;
+    //   mockData.freemem = Math.max(mockData.freemem - Math.random() * 100000000, 1024 * 1024 * 1024);
+    //   mockData.loadavg = [
+    //     Math.max(Math.min(mockData.loadavg[0] + (Math.random() - 0.5) * 0.2, 5), 0.1),
+    //     Math.max(Math.min(mockData.loadavg[1] + (Math.random() - 0.5) * 0.1, 4), 0.1),
+    //     Math.max(Math.min(mockData.loadavg[2] + (Math.random() - 0.5) * 0.05, 3), 0.1)
+    //   ];
       
       // Simulate fluctuating temperature
-      const tempC = parseFloat(mockData.temp.match(/(\d+\.?\d*) °C/)[1]);
-      const newTempC = Math.max(Math.min(tempC + (Math.random() - 0.5), 90), 30);
-      const newTempF = (newTempC * 9/5) + 32;
-      mockData.temp = `${newTempC.toFixed(2)} °C / ${newTempF.toFixed(2)} °F`;
+    //   const tempC = parseFloat(mockData.temp.match(/(\d+\.?\d*) °C/)[1]);
+    //   const newTempC = Math.max(Math.min(tempC + (Math.random() - 0.5), 90), 30);
+    //   const newTempF = (newTempC * 9/5) + 32;
+    //   mockData.temp = `${newTempC.toFixed(2)} °C / ${newTempF.toFixed(2)} °F`;
       
       // Update CPU usage
-      mockData.cpus = mockData.cpus.map(cpu => {
-        const newCpu = {...cpu};
-        newCpu.times = {...cpu.times};
+    //   mockData.cpus = mockData.cpus.map(cpu => {
+    //     const newCpu = {...cpu};
+    //     newCpu.times = {...cpu.times};
         
-        // Adjust times
-        newCpu.times.user += Math.random() * 5000;
-        newCpu.times.nice += Math.random() * 100;
-        newCpu.times.sys += Math.random() * 2500;
-        newCpu.times.idle += Math.random() * 7500;
-        newCpu.times.irq += Math.random() * 100;
+    //     // Adjust times
+    //     newCpu.times.user += Math.random() * 5000;
+    //     newCpu.times.nice += Math.random() * 100;
+    //     newCpu.times.sys += Math.random() * 2500;
+    //     newCpu.times.idle += Math.random() * 7500;
+    //     newCpu.times.irq += Math.random() * 100;
         
-        return newCpu;
-      });
+    //     return newCpu;
+    //   });
+    const res = await fetch('/stats');
+    const data = await res.json();
       
-      updateStats(mockData);
+      updateStats(data);
     }
 
     // In your actual implementation:
