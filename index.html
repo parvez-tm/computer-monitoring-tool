@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pi Stats Dashboard</title>
+  <style>
+    body { font-family: Arial; padding: 2em; background: #111; color: #0f0; }
+    h1 { color: #0ff; }
+    .stat { margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Raspberry Pi 5 Stats</h1>
+  <div id="stats"></div>
+
+  <script>
+    async function fetchStats() {
+      const res = await fetch('/stats');
+      const data = await res.json();
+
+      document.getElementById('stats').innerHTML = `
+        <div class="stat"><strong>Uptime:</strong> ${Math.floor(data.uptime)} sec</div>
+        <div class="stat"><strong>Free Memory:</strong> ${Math.round(data.freemem / 1024 / 1024)} MB</div>
+        <div class="stat"><strong>Total Memory:</strong> ${Math.round(data.totalmem / 1024 / 1024)} MB</div>
+        <div class="stat"><strong>Load Avg:</strong> ${data.loadavg.map(n => n.toFixed(2)).join(', ')}</div>
+        <div class="stat"><strong>CPU Cores:</strong> ${data.cpus.length}</div>
+      `;
+    }
+
+    setInterval(fetchStats, 1000); // update every second
+    fetchStats();
+  </script>
+</body>
+</html>
