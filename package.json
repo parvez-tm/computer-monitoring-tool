@@ -6,6 +6,7 @@
     "start": "nodemon index.js"
   },
   "dependencies": {
+    "diskusage": "^1.2.0",
     "nodemon": "^3.1.10",
     "systeminformation": "^5.25.11"
   }

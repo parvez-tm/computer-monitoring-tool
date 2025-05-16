@@ -3,6 +3,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const si = require('systeminformation');
+const disk = require('diskusage');
 
 let server = http.createServer(async (req, res) => {
   // res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -25,6 +26,20 @@ let server = http.createServer(async (req, res) => {
         cpus: os.cpus(),
         temp: `${tempC.toFixed(2)} °C / ${tempF.toFixed(2)} °F`
       };
+
+      disk.check('/', function(err, info) {
+        if (err) {
+          console.error(err);
+        } else {
+          const freeGB = (info.free / (1024 * 1024 * 1024)).toFixed(2);
+          const totalGB = (info.total / (1024 * 1024 * 1024)).toFixed(2);
+          const usedGB = (info.available / (1024 * 1024 * 1024)).toFixed(2);
+  
+           console.log(`Total disk space: ${totalGB} GB`);
+           console.log(`Used disk space: ${usedGB} GB`);
+           console.log(`Free disk space: ${freeGB} GB`);
+        }
+      });
       // console.log(stats, "ad");
       // si.cpuTemperature().then(data => {
       // console.log('CPU Temperature:', data);
